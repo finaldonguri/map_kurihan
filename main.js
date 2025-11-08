@@ -5,12 +5,17 @@ Cesium.Ion.defaultAccessToken =
 (async function () {
     // ===== Viewer =====
     const viewer = new Cesium.Viewer("cesiumContainer", {
-        baseLayerPicker: false,    // ← 切り替えを自前で行うのでOFF推奨
+        baseLayerPicker: false,
         timeline: false,
         animation: false,
         geocoder: false,
         homeButton: false
     });
+    // ★★ ここを追加：既定のベースレイヤーを完全に除去 ★★
+    while (viewer.imageryLayers.length > 0) {
+        viewer.imageryLayers.remove(viewer.imageryLayers.get(0), false);
+    }
+    // ↑ これで「最初から載ってるレイヤー」はゼロになります
 
     // 光源＆時間（任意）
     viewer.scene.globe.enableLighting = true;
@@ -21,107 +26,102 @@ Cesium.Ion.defaultAccessToken =
     const terrainProvider = await Cesium.CesiumTerrainProvider.fromIonAssetId(2767062);
     viewer.terrainProvider = terrainProvider;
 
-    // ===== 画像レイヤーの用意（最初に全部追加）=====
+    // ===== 画像レイヤーの用意 =====
     const layers = viewer.imageryLayers;
 
-    // 衛星
-    const satelliteLayer = layers.addImageryProvider(await Cesium.IonImageryProvider.fromAssetId(3830183));
-    satelliteLayer.alpha = 1.0;
+    // 衛星（Ion）
+    const satelliteProvider = await Cesium.IonImageryProvider.fromAssetId(3830183);
 
-    // 地理院 地形図
-    const gsiLayer = layers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({
-        url: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
+    // 地理院 標準地図
+    const gsiProvider = new Cesium.UrlTemplateImageryProvider({
+        url: 'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',
         credit: new Cesium.Credit('<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>'),
-        minimumLevel: 2, maximumLevel: 18
-    }));
-    gsiLayer.alpha = 1.0; gsiLayer.brightness = 0.95;
+        minimumLevel: 2,
+        maximumLevel: 18
+    });
 
-    // 古地図4枚
-    const oldMapLayers = [];
+    // 古地図4枚（※ kitakomatsu のURL先頭の空白は消しておきます）
+    const kitakomatsuProvider = new Cesium.UrlTemplateImageryProvider({
+        url: 'https://mapwarper.h-gis.jp/maps/tile/815/{z}/{x}/{y}.png',
+        credit: new Cesium.Credit('<a href="http://purl.stanford.edu/hf547qg6944" target="_blank">…北小松…</a>'),
+        minimumLevel: 2,
+        maximumLevel: 18
+    });
+    const kumagawaProvider = new Cesium.UrlTemplateImageryProvider({
+        url: 'https://mapwarper.h-gis.jp/maps/tile/845/{z}/{x}/{y}.png',
+        credit: new Cesium.Credit('<a href="http://purl.stanford.edu/cb173fj2995" target="_blank">…熊川…</a>'),
+        minimumLevel: 2,
+        maximumLevel: 18
+    });
+    const chikubushimaProvider = new Cesium.UrlTemplateImageryProvider({
+        url: 'https://mapwarper.h-gis.jp/maps/tile/846/{z}/{x}/{y}.png',
+        credit: new Cesium.Credit('<a href="http://purl.stanford.edu/zt128hp6132" target="_blank">…竹生島…</a>'),
+        minimumLevel: 2,
+        maximumLevel: 18
+    });
+    const hikoneseibuProvider = new Cesium.UrlTemplateImageryProvider({
+        url: 'https://mapwarper.h-gis.jp/maps/tile/816/{z}/{x}/{y}.png',
+        credit: new Cesium.Credit('<a href="http://purl.stanford.edu/yn560bk7442" target="_blank">…彦根西部…</a>'),
+        minimumLevel: 2,
+        maximumLevel: 18
+    });
 
-    const kumagawaLayer = layers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({
-        url: "https://mapwarper.h-gis.jp/maps/tile/845/{z}/{x}/{y}.png",
-        credit: new Cesium.Credit('<a href="http://purl.stanford.edu/cb173fj2995" target="_blank">Stanford University Libraries / 熊川</a>'),
-        minimumLevel: 2, maximumLevel: 18
-    }));
-    oldMapLayers.push(kumagawaLayer);
+    // レイヤーを一度だけ追加して参照を保持
+    const layerSatellite = viewer.imageryLayers.addImageryProvider(satelliteProvider); // 衛星
+    const layerGSI = viewer.imageryLayers.addImageryProvider(gsiProvider);            // 地理院
 
-    const chikubushimaLayer = layers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({
-        url: "https://mapwarper.h-gis.jp/maps/tile/846/{z}/{x}/{y}.png",
-        credit: new Cesium.Credit('<a href="http://purl.stanford.edu/zt128hp6132" target="_blank">Stanford University Libraries / 竹生島</a>'),
-        minimumLevel: 2, maximumLevel: 18
-    }));
-    oldMapLayers.push(chikubushimaLayer);
+    // 古地図は上に重ねる前提で追加（順序はお好みで）
+    const layerOlds = [
+        viewer.imageryLayers.addImageryProvider(kumagawaProvider),
+        viewer.imageryLayers.addImageryProvider(chikubushimaProvider),
+        viewer.imageryLayers.addImageryProvider(hikoneseibuProvider),
+        viewer.imageryLayers.addImageryProvider(kitakomatsuProvider),
+    ];
 
-    const hikoneseibuLayer = layers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({
-        url: "https://mapwarper.h-gis.jp/maps/tile/816/{z}/{x}/{y}.png",
-        credit: new Cesium.Credit('<a href="http://purl.stanford.edu/yn560bk7442" target="_blank">Stanford University Libraries / 彦根西部</a>'),
-        minimumLevel: 2, maximumLevel: 18
-    }));
-    oldMapLayers.push(hikoneseibuLayer);
-
-    const kitakomatsuLayer = layers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({
-        // ※ 先頭の空白を削除！
-        url: "https://mapwarper.h-gis.jp/maps/tile/815/{z}/{x}/{y}.png",
-        credit: new Cesium.Credit('<a href="http://purl.stanford.edu/hf547qg6944" target="_blank">Stanford University Libraries / 北小松</a>'),
-        minimumLevel: 2, maximumLevel: 18
-    }));
-    oldMapLayers.push(kitakomatsuLayer);
-
-    // 見栄え調整（共通）
-    for (const L of oldMapLayers) {
-        L.alpha = 1.0;
-        L.brightness = 0.95;
+    // 初期状態は「衛星」だけ表示に
+    function allOff() {
+        layerSatellite.show = false;
+        layerGSI.show = false;
+        layerOlds.forEach(l => (l.show = false));
     }
+    allOff();
+    layerSatellite.show = true;
 
-    // ===== 切り替えロジック =====
-    function setActiveButton(activeId) {
-        for (const id of ["btn-gsi", "btn-sat", "btn-old"]) {
-            const el = document.getElementById(id);
-            if (el) el.classList.toggle("active", id === activeId);
-        }
-    }
+    // 見た目の調整（任意）
+    [layerSatellite, layerGSI, ...layerOlds].forEach(l => {
+        l.alpha = 1.0;
+        l.brightness = 0.95;
+    });
 
-    function hideAll() {
-        gsiLayer.show = false;
-        satelliteLayer.show = false;
-        for (const L of oldMapLayers) L.show = false;
+    // 切替ヘルパ（排他的に）
+    function showSatellite() {
+        allOff();
+        layerSatellite.show = true;
+        // 衛星を最背面にしたいなら：
+        viewer.imageryLayers.lowerToBottom(layerSatellite);
     }
 
     function showGSI() {
-        hideAll();
-        gsiLayer.show = true;
-        // ベースらしく最背面へ
-        layers.lowerToBottom(gsiLayer);
-        setActiveButton("btn-gsi");
-    }
-
-    function showSatellite() {
-        hideAll();
-        satelliteLayer.show = true;
-        layers.lowerToBottom(satelliteLayer);
-        setActiveButton("btn-sat");
+        allOff();
+        layerGSI.show = true;
+        viewer.imageryLayers.lowerToBottom(layerGSI);
     }
 
     function showOldMaps() {
-        hideAll();
-        for (const L of oldMapLayers) {
-            L.show = true;
-            // 古地図群は上に重ねておく（どれが上でもOK）
-            layers.raiseToTop(L);
-        }
-        setActiveButton("btn-old");
+        allOff();
+        // ベース無しで古地図のみ表示（古地図の重なりがそのまま出ます）
+        layerOlds.forEach(l => (l.show = true));
+        // 必要なら一枚を最上面に
+        viewer.imageryLayers.raiseToTop(layerOlds[layerOlds.length - 1]);
     }
 
-    // 初期表示：地理院
-    showGSI();
+    // 既存のボタンにイベントを付与（idはHTML側に合わせて）
+    document.getElementById('btn-satellite').onclick = showSatellite;
+    document.getElementById('btn-gsi').onclick = showGSI;
+    document.getElementById('btn-old').onclick = showOldMaps;
 
-    // ===== ボタン紐づけ =====
-    document.getElementById("btn-gsi").addEventListener("click", showGSI);
-    document.getElementById("btn-sat").addEventListener("click", showSatellite);
-    document.getElementById("btn-old").addEventListener("click", showOldMaps);
-
-    // ===== あなたのGeoJSON・ルート等はここから下にそのまま =====
+    // --- ここまでイメージ切替 ---
+    // ===== GeoJSON・ルート等はここから下にそのまま =====
     const routeGeojson = {
         "type": "FeatureCollection",
         "name": "route",
