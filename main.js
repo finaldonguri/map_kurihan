@@ -93,6 +93,28 @@ Cesium.Ion.defaultAccessToken =
     chikubushimaLayer.alpha = 1.0; // 0.0 is transparent.  1.0 is opaque.
     chikubushimaLayer.brightness = 0.95; // > 1.0 increases brightness.  < 1.0 decreases.
 
+    // 『彦根西部』五万分一地形圖 （先に読み込む）
+    const hikoneseibuProvider = new Cesium.UrlTemplateImageryProvider({
+        url: 'https://mapwarper.h-gis.jp/maps/tile/816/{z}/{x}/{y}.png',
+        credit: new Cesium.Credit('<a href="http://purl.stanford.edu/yn560bk7442" target="_blank">Image from the Map Collections courtesy Stanford University Libraries, licensed under a Creative Commons Attribution-Noncommercial 3.0 Unported License. © Stanford University. 【図幅名】 彦根西部 【測量時期】 明治26年測図/大正9年修正/昭和7年鉄道補入 【発行時期】 昭和8年6月発行 【記号】 名古屋13号（共16面） 【測量機関】 大日本帝国陸地測量部 </a>'),
+        minimumLevel: 2,
+        maximumLevel: 18
+    });
+    const hikoneseibuLayer = viewer.imageryLayers.addImageryProvider(hikoneseibuProvider);
+    hikoneseibuLayer.alpha = 1.0; // 0.0 is transparent.  1.0 is opaque.
+    hikoneseibuLayer.brightness = 0.95; // > 1.0 increases brightness.  < 1.0 decreases.
+
+    // 『北小松』五万分一地形圖 （先に読み込む）
+    const kitakomatsuProvider = new Cesium.UrlTemplateImageryProvider({
+        url: ' https://mapwarper.h-gis.jp/maps/tile/815/{z}/{x}/{y}.png',
+        credit: new Cesium.Credit('<a href="http://purl.stanford.edu/hf547qg6944" target="_blank">Image from the Map Collections courtesy Stanford University Libraries, licensed under a Creative Commons Attribution-Noncommercial 3.0 Unported License. © Stanford University. 【図幅名】 北小松 【測量時期】 明治26年測図/大正9年修正/昭和7年鉄道補入 【発行時期】 【記号】 京都及大阪1号（共16面） 【測量機関】 参謀本部 【備考】 秘</a>'),
+        minimumLevel: 2,
+        maximumLevel: 18
+    });
+    const kitakomatsuLayer = viewer.imageryLayers.addImageryProvider(kitakomatsuProvider);
+    kitakomatsuLayer.alpha = 1.0; // 0.0 is transparent.  1.0 is opaque.
+    kitakomatsuLayer.brightness = 0.95; // > 1.0 increases brightness.  < 1.0 decreases.
+
     // GeoJSONルートの読み込み
 
     console.log('GeoJSON読み込み開始:');
