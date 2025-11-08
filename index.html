@@ -6,55 +6,50 @@
     <title>九里半街道散策ルート</title>
     <link href="style.css" rel="stylesheet" />
 
-    <!-- Cesium 最新 -->
+    <!-- 常に最新版 Cesium -->
     <script src="https://unpkg.com/cesium@latest/Build/Cesium/Cesium.js"></script>
     <link href="https://unpkg.com/cesium@latest/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
-
     <style>
-        /* シンプルなレイヤースイッチャー */
-        .layer-switcher {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            display: grid;
-            grid-template-columns: repeat(3, auto);
-            gap: 6px;
-            z-index: 1000;
-        }
-
-        .layer-switcher button {
-            padding: 6px 10px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.9);
-            cursor: pointer;
-        }
-
-        .layer-switcher button.active {
-            border-color: #1976d2;
-            box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.25);
-        }
-
         #cesiumContainer {
             position: absolute;
             inset: 0;
+        }
+
+        .layer-toolbar {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+            background: rgba(0, 0, 0, .45);
+            backdrop-filter: blur(6px);
+            border-radius: 12px;
+            padding: 6px;
+            display: flex;
+            gap: 6px;
+        }
+
+        .layer-toolbar button {
+            border: none;
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #fff;
+            background: rgba(255, 255, 255, .12);
+        }
+
+        .layer-toolbar button.active {
+            background: #2d8cff;
         }
     </style>
 </head>
 
 <body>
     <div id="cesiumContainer"></div>
-
-    <!-- レイヤーボタン -->
-    <div class="layer-switcher" id="layerSwitcher">
-        <button data-layer="chikeizu" class="active">地理院</button>
-        <button data-layer="satellite">衛星</button>
-        <button data-layer="kumagawa">熊川（古地図）</button>
-        <button data-layer="chikubushima">竹生島（古地図）</button>
-        <button data-layer="hikoneseibu">彦根西部（古地図）</button>
-        <button data-layer="kitakomatsu">北小松（古地図）</button>
+    <div class="layer-toolbar">
+        <button id="btn-gsi" class="active">地理院</button>
+        <button id="btn-sat">衛星</button>
+        <button id="btn-old">古地図</button>
     </div>
-
     <script src="main.js"></script>
 </body>
 

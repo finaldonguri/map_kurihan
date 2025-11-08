@@ -2,134 +2,126 @@
 Cesium.Ion.defaultAccessToken =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyOGRiZmY3Yy0wNzRjLTQ2MjktOGQ0Ni0xYmI5MzFmNDUxZDAiLCJpZCI6MzU0MDY0LCJpYXQiOjE3NjE0NTQ3MDh9.p9q4yTuNNbVz7U09nx04n-LQG0sxXh8TDw22H3FSIV0";
 
-// 非同期処理を関数でラップ
 (async function () {
-    // Cesium Viewerの初期化（自前ボタンを使うので baseLayerPicker: false 推奨）
+    // ===== Viewer =====
     const viewer = new Cesium.Viewer("cesiumContainer", {
-        baseLayerPicker: false,
+        baseLayerPicker: false,    // ← 切り替えを自前で行うのでOFF推奨
         timeline: false,
         animation: false,
         geocoder: false,
-        homeButton: false,
+        homeButton: false
     });
 
-    // 昼光の見た目固定（任意）
+    // 光源＆時間（任意）
     viewer.scene.globe.enableLighting = true;
     viewer.clock.currentTime = Cesium.JulianDate.fromDate(new Date("2024-06-21T12:00:00Z"));
     viewer.clock.shouldAnimate = false;
 
-    // ===== 画像レイヤーの準備 =====
-
-    // 地形（先に設定）
+    // ===== 地形 =====
     const terrainProvider = await Cesium.CesiumTerrainProvider.fromIonAssetId(2767062);
     viewer.terrainProvider = terrainProvider;
 
-    // 衛星（Google 2D Satellite with Labels）
-    const ionSatellite = await Cesium.IonImageryProvider.fromAssetId(3830183);
-    const satelliteLayer = viewer.imageryLayers.addImageryProvider(ionSatellite);
+    // ===== 画像レイヤーの用意（最初に全部追加）=====
+    const layers = viewer.imageryLayers;
 
-    // 地理院 標準地図
-    const chikeizuLayer = viewer.imageryLayers.addImageryProvider(
-        new Cesium.UrlTemplateImageryProvider({
-            url: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
-            credit: new Cesium.Credit(
-                '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>'
-            ),
-            minimumLevel: 2,
-            maximumLevel: 18,
-        })
-    );
+    // 衛星
+    const satelliteLayer = layers.addImageryProvider(await Cesium.IonImageryProvider.fromAssetId(3830183));
+    satelliteLayer.alpha = 1.0;
+
+    // 地理院 地形図
+    const gsiLayer = layers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({
+        url: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
+        credit: new Cesium.Credit('<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>'),
+        minimumLevel: 2, maximumLevel: 18
+    }));
+    gsiLayer.alpha = 1.0; gsiLayer.brightness = 0.95;
 
     // 古地図4枚
-    const kumagawaLayer = viewer.imageryLayers.addImageryProvider(
-        new Cesium.UrlTemplateImageryProvider({
-            url: "https://mapwarper.h-gis.jp/maps/tile/845/{z}/{x}/{y}.png",
-            credit: new Cesium.Credit(
-                '<a href="http://purl.stanford.edu/cb173fj2995" target="_blank">Stanford SUL（熊川）</a>'
-            ),
-            minimumLevel: 2,
-            maximumLevel: 18,
-        })
-    );
+    const oldMapLayers = [];
 
-    const chikubushimaLayer = viewer.imageryLayers.addImageryProvider(
-        new Cesium.UrlTemplateImageryProvider({
-            url: "https://mapwarper.h-gis.jp/maps/tile/846/{z}/{x}/{y}.png",
-            credit: new Cesium.Credit(
-                '<a href="http://purl.stanford.edu/zt128hp6132" target="_blank">Stanford SUL（竹生島）</a>'
-            ),
-            minimumLevel: 2,
-            maximumLevel: 18,
-        })
-    );
+    const kumagawaLayer = layers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({
+        url: "https://mapwarper.h-gis.jp/maps/tile/845/{z}/{x}/{y}.png",
+        credit: new Cesium.Credit('<a href="http://purl.stanford.edu/cb173fj2995" target="_blank">Stanford University Libraries / 熊川</a>'),
+        minimumLevel: 2, maximumLevel: 18
+    }));
+    oldMapLayers.push(kumagawaLayer);
 
-    const hikoneseibuLayer = viewer.imageryLayers.addImageryProvider(
-        new Cesium.UrlTemplateImageryProvider({
-            url: "https://mapwarper.h-gis.jp/maps/tile/816/{z}/{x}/{y}.png",
-            credit: new Cesium.Credit(
-                '<a href="http://purl.stanford.edu/yn560bk7442" target="_blank">Stanford SUL（彦根西部）</a>'
-            ),
-            minimumLevel: 2,
-            maximumLevel: 18,
-        })
-    );
+    const chikubushimaLayer = layers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({
+        url: "https://mapwarper.h-gis.jp/maps/tile/846/{z}/{x}/{y}.png",
+        credit: new Cesium.Credit('<a href="http://purl.stanford.edu/zt128hp6132" target="_blank">Stanford University Libraries / 竹生島</a>'),
+        minimumLevel: 2, maximumLevel: 18
+    }));
+    oldMapLayers.push(chikubushimaLayer);
 
-    const kitakomatsuLayer = viewer.imageryLayers.addImageryProvider(
-        new Cesium.UrlTemplateImageryProvider({
-            // ※ 先頭の空白を削除
-            url: "https://mapwarper.h-gis.jp/maps/tile/815/{z}/{x}/{y}.png",
-            credit: new Cesium.Credit(
-                '<a href="http://purl.stanford.edu/hf547qg6944" target="_blank">Stanford SUL（北小松）</a>'
-            ),
-            minimumLevel: 2,
-            maximumLevel: 18,
-        })
-    );
+    const hikoneseibuLayer = layers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({
+        url: "https://mapwarper.h-gis.jp/maps/tile/816/{z}/{x}/{y}.png",
+        credit: new Cesium.Credit('<a href="http://purl.stanford.edu/yn560bk7442" target="_blank">Stanford University Libraries / 彦根西部</a>'),
+        minimumLevel: 2, maximumLevel: 18
+    }));
+    oldMapLayers.push(hikoneseibuLayer);
 
-    // レイヤー辞書（名前→ImageryLayer）
-    const layers = {
-        chikeizu: chikeizuLayer,
-        satellite: satelliteLayer,
-        kumagawa: kumagawaLayer,
-        chikubushima: chikubushimaLayer,
-        hikoneseibu: hikoneseibuLayer,
-        kitakomatsu: kitakomatsuLayer,
-    };
+    const kitakomatsuLayer = layers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({
+        // ※ 先頭の空白を削除！
+        url: "https://mapwarper.h-gis.jp/maps/tile/815/{z}/{x}/{y}.png",
+        credit: new Cesium.Credit('<a href="http://purl.stanford.edu/hf547qg6944" target="_blank">Stanford University Libraries / 北小松</a>'),
+        minimumLevel: 2, maximumLevel: 18
+    }));
+    oldMapLayers.push(kitakomatsuLayer);
 
-    // まず全てを非表示にして、地理院だけ表示
-    Object.values(layers).forEach((l) => (l.show = false));
-    layers.chikeizu.show = true;
+    // 見栄え調整（共通）
+    for (const L of oldMapLayers) {
+        L.alpha = 1.0;
+        L.brightness = 0.95;
+    }
 
-    // 念のためすべて最背面に下げた上で、表示対象を最背面に（ベースレイヤー挙動）
-    Object.values(layers).forEach((l) => viewer.imageryLayers.lowerToBottom(l));
-
-    // ボタンで切り替え
-    const switcher = document.getElementById("layerSwitcher");
-
-    function setBaseLayer(name) {
-        Object.entries(layers).forEach(([key, layer]) => {
-            layer.show = key === name;
-            // ベースは完全不透明＆標準明るさに
-            if (key === name) {
-                layer.alpha = 1.0;
-                layer.brightness = 1.0;
-                viewer.imageryLayers.lowerToBottom(layer); // 念押しで最背面
-            }
-        });
-
-        // ボタンの見た目更新
-        for (const btn of switcher.querySelectorAll("button")) {
-            btn.classList.toggle("active", btn.dataset.layer === name);
+    // ===== 切り替えロジック =====
+    function setActiveButton(activeId) {
+        for (const id of ["btn-gsi", "btn-sat", "btn-old"]) {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle("active", id === activeId);
         }
     }
 
-    switcher.addEventListener("click", (e) => {
-        const btn = e.target.closest("button[data-layer]");
-        if (!btn) return;
-        setBaseLayer(btn.dataset.layer);
-    });
+    function hideAll() {
+        gsiLayer.show = false;
+        satelliteLayer.show = false;
+        for (const L of oldMapLayers) L.show = false;
+    }
 
-    // ====== 以下はあなたのGeoJSONやルート描画（そのまま） ======
+    function showGSI() {
+        hideAll();
+        gsiLayer.show = true;
+        // ベースらしく最背面へ
+        layers.lowerToBottom(gsiLayer);
+        setActiveButton("btn-gsi");
+    }
+
+    function showSatellite() {
+        hideAll();
+        satelliteLayer.show = true;
+        layers.lowerToBottom(satelliteLayer);
+        setActiveButton("btn-sat");
+    }
+
+    function showOldMaps() {
+        hideAll();
+        for (const L of oldMapLayers) {
+            L.show = true;
+            // 古地図群は上に重ねておく（どれが上でもOK）
+            layers.raiseToTop(L);
+        }
+        setActiveButton("btn-old");
+    }
+
+    // 初期表示：地理院
+    showGSI();
+
+    // ===== ボタン紐づけ =====
+    document.getElementById("btn-gsi").addEventListener("click", showGSI);
+    document.getElementById("btn-sat").addEventListener("click", showSatellite);
+    document.getElementById("btn-old").addEventListener("click", showOldMaps);
+
+    // ===== あなたのGeoJSON・ルート等はここから下にそのまま =====
     const routeGeojson = {
         "type": "FeatureCollection",
         "name": "route",
@@ -139,9 +131,8 @@ Cesium.Ion.defaultAccessToken =
                 "type": "Feature",
                 "properties": { "name": "A", "style": "Line" },
                 "geometry": {
-                    "type": "LineString",
-                    "coordinates": [
-                        [135.9793097446544, 35.363503452799705],
+                    "type": "LineString", "coordinates": [
+                        [135.97930974465442, 35.363503452799705],
                         [135.99242853539212, 35.357807738323956],
                         [135.9878983054971, 35.350264146729216],
                         [136.0016777547612, 35.346953981069525],
@@ -165,8 +156,7 @@ Cesium.Ion.defaultAccessToken =
                 "type": "Feature",
                 "properties": { "name": "B", "style": "arrow" },
                 "geometry": {
-                    "type": "LineString",
-                    "coordinates": [
+                    "type": "LineString", "coordinates": [
                         [135.97107510802226, 35.36134836484571, 500],
                         [136.01486733034105, 35.338716468502554, 500],
                         [136.04393630550095, 35.406131576041915, 500]
@@ -177,12 +167,11 @@ Cesium.Ion.defaultAccessToken =
     };
 
     try {
-        const dataSource = await Cesium.GeoJsonDataSource.load(routeGeojson);
-        viewer.dataSources.add(dataSource);
+        const ds = await Cesium.GeoJsonDataSource.load(routeGeojson);
+        viewer.dataSources.add(ds);
+        const entities = ds.entities.values;
 
-        const entities = dataSource.entities.values;
-        for (let i = 0; i < entities.length; i++) {
-            const entity = entities[i];
+        for (const entity of entities) {
             const p = entity.properties;
             const style = p?.style?.getValue?.();
             const name = entity.name ?? p?.name?.getValue?.();
@@ -208,30 +197,50 @@ Cesium.Ion.defaultAccessToken =
             }
         }
 
-        // Start/Finish（そのまま）
+
+        // スタートのポイント
         viewer.entities.add({
             position: Cesium.Cartesian3.fromDegrees(135.979263, 35.363388, 184),
-            point: { pixelSize: 8, color: Cesium.Color.RED, outlineColor: Cesium.Color.WHITE, outlineWidth: 2 },
+            point: {
+                pixelSize: 8,
+                color: Cesium.Color.RED,
+                outlineColor: Cesium.Color.WHITE,
+                outlineWidth: 2
+            },
             label: {
-                text: "Start", font: "14pt sans-serif",
-                style: Cesium.LabelStyle.FILL_AND_OUTLINE, fillColor: Cesium.Color.WHITE,
-                outlineColor: Cesium.Color.BLACK, outlineWidth: 3,
-                verticalOrigin: Cesium.VerticalOrigin.BOTTOM, pixelOffset: new Cesium.Cartesian2(0, -9)
+                text: 'Start',
+                font: '14pt sans-serif',
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                fillColor: Cesium.Color.WHITE,
+                outlineColor: Cesium.Color.BLACK,
+                outlineWidth: 3,
+                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                pixelOffset: new Cesium.Cartesian2(0, -9)
             }
         });
 
+        // ゴールのポイント
         viewer.entities.add({
             position: Cesium.Cartesian3.fromDegrees(136.045187, 35.409939, 134),
-            point: { pixelSize: 8, color: Cesium.Color.RED, outlineColor: Cesium.Color.WHITE, outlineWidth: 2 },
+            point: {
+                pixelSize: 8,
+                color: Cesium.Color.RED,
+                outlineColor: Cesium.Color.WHITE,
+                outlineWidth: 2
+            },
             label: {
-                text: "Finish", font: "14pt sans-serif",
-                style: Cesium.LabelStyle.FILL_AND_OUTLINE, fillColor: Cesium.Color.WHITE,
-                outlineColor: Cesium.Color.BLACK, outlineWidth: 3,
-                verticalOrigin: Cesium.VerticalOrigin.BOTTOM, pixelOffset: new Cesium.Cartesian2(0, -9)
+                text: 'Finish',
+                font: '14pt sans-serif',
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                fillColor: Cesium.Color.WHITE,
+                outlineColor: Cesium.Color.BLACK,
+                outlineWidth: 3,
+                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                pixelOffset: new Cesium.Cartesian2(0, -9)
             }
         });
 
-        viewer.flyTo(dataSource);
+        viewer.flyTo(ds);
     } catch (e) {
         console.error("GeoJSON読み込みエラー:", e);
     }
