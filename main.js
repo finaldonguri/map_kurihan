@@ -41,98 +41,11 @@ Cesium.Ion.defaultAccessToken =
                 "geometry": {
                     "type": "LineString",
                     "coordinates": [
-                        [
-                            136.34026747483415,
-                            35.205964151356866
-                        ],
-                        [
-                            136.339767925555293,
-                            35.206522703560395
-                        ],
-                        [
-                            136.340688147911067,
-                            35.207016804230143
-                        ],
-                        [
-                            136.341319157526414,
-                            35.207833137879973
-                        ],
-                        [
-                            136.342896681564923,
-                            35.208176854856227
-                        ],
-                        [
-                            136.344342745266857,
-                            35.208434641633573
-                        ],
-                        [
-                            136.345210383487995,
-                            35.208950212732979
-                        ],
-                        [
-                            136.345631056564883,
-                            35.210840612088582
-                        ],
-                        [
-                            136.345999145507221,
-                            35.211742832628175
-                        ],
-                        [
-                            136.346551278920685,
-                            35.213805013354808
-                        ],
-                        [
-                            136.346656447189929,
-                            35.214556837047724
-                        ],
-                        [
-                            136.347392625074491,
-                            35.215759740473558
-                        ],
-                        [
-                            136.347340040939912,
-                            35.216704866374656
-                        ],
-                        [
-                            136.347418917141795,
-                            35.217649981271236
-                        ],
-                        [
-                            136.348102510891835,
-                            35.217564062189922
-                        ],
-                        [
-                            136.348339139497597,
-                            35.21799365668705
-                        ],
-                        [
-                            136.349785203199502,
-                            35.217735900261602
-                        ],
-                        [
-                            136.350521381084093,
-                            35.218723962114048
-                        ],
-                        [
-                            136.351914860651419,
-                            35.219368343798614
-                        ],
-                        [
-                            136.351967444786055,
-                            35.220163074163857
-                        ],
-                        [
-                            136.353571260891812,
-                            35.220248990493971
-                        ],
-                        [
-                            136.353571260891812,
-                            35.220248990493971
-                        ]
+                        [135.979309744654415, 35.363503452799705], [135.992428535392122, 35.357807738323956], [135.987898305497112, 35.350264146729216], [136.001677754761204, 35.346953981069525], [136.010171935814412, 35.343643679763964], [136.018666116867649, 35.338023555321548], [136.02064809244672, 35.342873822810766], [136.027443437289293, 35.350802998067692], [136.029897311815802, 35.359501100813517], [136.033672503394968, 35.368583075360242], [136.032728705500176, 35.378510505577488], [136.034050022552861, 35.386051457960576], [136.034899440658222, 35.38643618152998], [136.033766883184455, 35.389744728480238], [136.035276959816116, 35.397669300665093], [136.038957771605851, 35.403669914822459], [136.046225015395805, 35.410131615184817]
                     ]
                 }
             },
-            { "type": "Feature", "properties": { "name": "B", "style": "arrow", "symbol": null, "number": null, "comment": null, "description": null, "source": null, "url": null, "url name": null }, "geometry": { "type": "LineString", "coordinates": [[ 136.336810,35.204672, 950], [136.346537, 35.216180, 1150], [ 136.351842,35.220050, 1200]] } }
+            { "type": "Feature", "properties": { "name": "B", "style": "arrow", "symbol": null, "number": null, "comment": null, "description": null, "source": null, "url": null, "url name": null }, "geometry": { "type": "LineString", "coordinates": [[135.971075108022262, 35.361348364845711, 500], [136.014867330341048, 35.338716468502554, 500], [136.043936305500949, 35.406131576041915, 500]] } }
         ]
     }
         ;
@@ -157,6 +70,28 @@ Cesium.Ion.defaultAccessToken =
     const chikeizuLayer = viewer.imageryLayers.addImageryProvider(chikeizuProvider);
     chikeizuLayer.alpha = 1.0; // 0.0 is transparent.  1.0 is opaque.
     chikeizuLayer.brightness = 0.95; // > 1.0 increases brightness.  < 1.0 decreases.
+
+    // 『熊川』五万分一地形圖（先に読み込む）
+    const kumagawaProvider = new Cesium.UrlTemplateImageryProvider({
+        url: 'https://mapwarper.h-gis.jp/maps/tile/845/{z}/{x}/{y}.png',
+        credit: new Cesium.Credit('<a href="http://purl.stanford.edu/cb173fj2995" target="_blank">Image from the Map Collections courtesy Stanford University Libraries, licensed under a Creative Commons Attribution-Noncommercial 3.0 Unported License. © Stanford University. 【図幅名】 熊川 【測量時期】 明治26年測図/大正9年修正 【発行時期】 【記号】 宮津4号（共5面） 【測量機関】 参謀本部 【備考】 秘</a>'),
+        minimumLevel: 2,
+        maximumLevel: 18
+    });
+    const kumagawaLayer = viewer.imageryLayers.addImageryProvider(kumagawaProvider);
+    kumagawaLayer.alpha = 1.0; // 0.0 is transparent.  1.0 is opaque.
+    kumagawaLayer.brightness = 0.95; // > 1.0 increases brightness.  < 1.0 decreases.
+
+    // 『竹生島』五万分一地形圖 （先に読み込む）
+    const chikubushimaProvider = new Cesium.UrlTemplateImageryProvider({
+        url: 'https://mapwarper.h-gis.jp/maps/tile/846/{z}/{x}/{y}.png',
+        credit: new Cesium.Credit('<a href="http://purl.stanford.edu/zt128hp6132" target="_blank">Image from the Map Collections courtesy Stanford University Libraries, licensed under a Creative Commons Attribution-Noncommercial 3.0 Unported License. © Stanford University. 【図幅名】 竹生島 【測量時期】 明治26年測図/大正9年修正/昭和7年鉄道補入/昭和26年応急修正 【発行時期】 昭和29年9月発行 【記号】 岐阜16号（共16面） 【測量機関】 国土地理院 【備考】 応急修正版</a>'),
+        minimumLevel: 2,
+        maximumLevel: 18
+    });
+    const chikubushimaLayer = viewer.imageryLayers.addImageryProvider(chikubushimaProvider);
+    chikubushimaLayer.alpha = 1.0; // 0.0 is transparent.  1.0 is opaque.
+    chikubushimaLayer.brightness = 0.95; // > 1.0 increases brightness.  < 1.0 decreases.
 
     // GeoJSONルートの読み込み
 
@@ -231,26 +166,6 @@ Cesium.Ion.defaultAccessToken =
             }
         }
 
-        // 高室山のポイント
-        viewer.entities.add({
-            position: Cesium.Cartesian3.fromDegrees(136.353516, 35.220142, 859),
-            point: {
-                pixelSize: 8,
-                color: Cesium.Color.RED,
-                outlineColor: Cesium.Color.WHITE,
-                outlineWidth: 2
-            },
-            label: {
-                text: 'Mt.Takamuro(818m)',
-                font: '14pt sans-serif',
-                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                fillColor: Cesium.Color.WHITE,
-                outlineColor: Cesium.Color.BLACK,
-                outlineWidth: 3,
-                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                pixelOffset: new Cesium.Cartesian2(0, -9)
-            }
-        });
         // スタートのポイント
         viewer.entities.add({
             position: Cesium.Cartesian3.fromDegrees( 136.339884,35.206083, 284),
@@ -262,26 +177,6 @@ Cesium.Ion.defaultAccessToken =
             },
             label: {
                 text: 'Start/Finish',
-                font: '14pt sans-serif',
-                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                fillColor: Cesium.Color.WHITE,
-                outlineColor: Cesium.Color.BLACK,
-                outlineWidth: 3,
-                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                pixelOffset: new Cesium.Cartesian2(0, -9)
-            }
-        });
-        // 霊仙山のポイント
-        viewer.entities.add({
-            position: Cesium.Cartesian3.fromDegrees(136.376960, 35.280262, 1123),
-            point: {
-                pixelSize: 8,
-                color: Cesium.Color.RED,
-                outlineColor: Cesium.Color.WHITE,
-                outlineWidth: 2
-            },
-            label: {
-                text: 'Mt.Ryozen(1,083m)',
                 font: '14pt sans-serif',
                 style: Cesium.LabelStyle.FILL_AND_OUTLINE,
                 fillColor: Cesium.Color.WHITE,
