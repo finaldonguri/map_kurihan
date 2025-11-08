@@ -46,25 +46,25 @@ Cesium.Ion.defaultAccessToken =
     const providersOld = [
         new Cesium.UrlTemplateImageryProvider({
             url: "https://mapwarper.h-gis.jp/maps/tile/845/{z}/{x}/{y}.png", // 熊川
-            credit: new Cesium.Credit("…熊川…"),
+            credit: new Cesium.Credit("『熊川』五万分一地形圖, 明治26年測図/大正9年修正, https://purl.stanford.edu/cb173fj2995"),
             minimumLevel: 2,
             maximumLevel: 18,
         }),
         new Cesium.UrlTemplateImageryProvider({
             url: "https://mapwarper.h-gis.jp/maps/tile/846/{z}/{x}/{y}.png", // 竹生島
-            credit: new Cesium.Credit("…竹生島…"),
+            credit: new Cesium.Credit("『竹生島』五万分一地形圖, 明治26年測図/大正9年修正/昭和7年鉄道補入/昭和26年応急修正, https://purl.stanford.edu/zt128hp6132"),
             minimumLevel: 2,
             maximumLevel: 18,
         }),
         new Cesium.UrlTemplateImageryProvider({
             url: "https://mapwarper.h-gis.jp/maps/tile/816/{z}/{x}/{y}.png", // 彦根西部
-            credit: new Cesium.Credit("…彦根西部…"),
+            credit: new Cesium.Credit("『彦根西部』五万分一地形圖, 明治26年測図/大正9年修正/昭和7年鉄道補入, https://purl.stanford.edu/yn560bk7442"),
             minimumLevel: 2,
             maximumLevel: 18,
         }),
         new Cesium.UrlTemplateImageryProvider({
             url: "https://mapwarper.h-gis.jp/maps/tile/815/{z}/{x}/{y}.png", // 北小松
-            credit: new Cesium.Credit("…北小松…"),
+            credit: new Cesium.Credit("『北小松』五万分一地形圖, 明治26年測図/大正9年修正/昭和7年鉄道補入, https://purl.stanford.edu/hf547qg6944"),
             minimumLevel: 2,
             maximumLevel: 18,
         }),
