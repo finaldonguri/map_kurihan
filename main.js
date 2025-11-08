@@ -255,7 +255,17 @@ Cesium.Ion.defaultAccessToken =
 
         // スタート／ゴール（任意）
         viewer.entities.add({
-            position: Cesium.Cartesian3.fromDegrees(135.9764736, 35.3648148, 184),
+            id: "start",                   // 任意の固定ID（なくてもOK）
+            name: "スタート地点（上古賀集落）",
+            description: `
+    <h3>スタート地点（上古賀集落）</h3>
+    <p>ここから九里半街道の散策ルートが始まります。</p>
+    <ul>
+      <li>標高: 約 134 m</li>
+      <li>座標: 135.9764736, 35.3648148</li>
+    </ul>
+  `,
+              position: Cesium.Cartesian3.fromDegrees(135.9764736, 35.3648148, 184),
             point: { pixelSize: 8, color: Cesium.Color.RED, outlineColor: Cesium.Color.WHITE, outlineWidth: 2 },
             label: {
                 text: "Start",
@@ -270,6 +280,16 @@ Cesium.Ion.defaultAccessToken =
         });
 
         viewer.entities.add({
+            id: "Finish",                   // 任意の固定ID（なくてもOK）
+            name: "ゴール地点（石田川河口）",
+            description: `
+    <h3>ゴール地点（石田川河口）</h3>
+    <p>かつての九里半街道は、ここから船にて湖上を大津へ向かいました。</p>
+    <ul>
+      <li>標高: 約 86 m</li>
+      <li>座標: 135.9764736, 35.3648148</li>
+    </ul>
+  `,
             position: Cesium.Cartesian3.fromDegrees(136.045836, 35.408181, 134),
             point: { pixelSize: 8, color: Cesium.Color.RED, outlineColor: Cesium.Color.WHITE, outlineWidth: 2 },
             label: {
