@@ -262,7 +262,7 @@ Cesium.Ion.defaultAccessToken =
     <p>ここから九里半街道の散策ルートが始まります。</p>
     <ul>
       <li>標高: 約 134 m</li>
-      <li>座標: 135.9764736, 35.3648148</li>
+      <li>座標: 35.36 N, 135.97 E, </li>
     </ul>
   `,
               position: Cesium.Cartesian3.fromDegrees(135.9764736, 35.3648148, 184),
@@ -287,7 +287,7 @@ Cesium.Ion.defaultAccessToken =
     <p>かつての九里半街道は、ここから船にて湖上を大津へ向かいました。</p>
     <ul>
       <li>標高: 約 86 m</li>
-      <li>座標: 135.9764736, 35.3648148</li>
+      <li>座標: 35.40 N, 136.04 E</li>
     </ul>
   `,
             position: Cesium.Cartesian3.fromDegrees(136.045836, 35.408181, 134),
