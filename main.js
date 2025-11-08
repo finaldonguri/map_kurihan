@@ -219,7 +219,7 @@ Cesium.Ion.defaultAccessToken =
                 outlineWidth: 2
             },
             label: {
-                text: 'Start',
+                text: 'Finish',
                 font: '14pt sans-serif',
                 style: Cesium.LabelStyle.FILL_AND_OUTLINE,
                 fillColor: Cesium.Color.WHITE,
