@@ -190,7 +190,7 @@ Cesium.Ion.defaultAccessToken =
 
         // スタートのポイント
         viewer.entities.add({
-            position: Cesium.Cartesian3.fromDegrees( 136.339884,35.206083, 284),
+            position: Cesium.Cartesian3.fromDegrees( 135.979263,35.363388, 184),
             point: {
                 pixelSize: 8,
                 color: Cesium.Color.RED,
@@ -198,7 +198,28 @@ Cesium.Ion.defaultAccessToken =
                 outlineWidth: 2
             },
             label: {
-                text: 'Start/Finish',
+                text: 'Start',
+                font: '14pt sans-serif',
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                fillColor: Cesium.Color.WHITE,
+                outlineColor: Cesium.Color.BLACK,
+                outlineWidth: 3,
+                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                pixelOffset: new Cesium.Cartesian2(0, -9)
+            }
+        });
+
+        // ゴールのポイント
+        viewer.entities.add({
+            position: Cesium.Cartesian3.fromDegrees( 136.045187,35.409939, 134),
+            point: {
+                pixelSize: 8,
+                color: Cesium.Color.RED,
+                outlineColor: Cesium.Color.WHITE,
+                outlineWidth: 2
+            },
+            label: {
+                text: 'Start',
                 font: '14pt sans-serif',
                 style: Cesium.LabelStyle.FILL_AND_OUTLINE,
                 fillColor: Cesium.Color.WHITE,
