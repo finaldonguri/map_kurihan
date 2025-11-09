@@ -405,7 +405,7 @@ Cesium.Ion.defaultAccessToken =
                 // 生成ボタン用（色でON/OFF表現）
                 btn.style.background = visible ? "#2d8cff" : "rgba(255,255,255,.12)";
             }
-            btn.textContent = visible ? "Summary Route:ON" : "Summary Route:OFF";
+            btn.textContent = visible ? "→:ON" : "→:OFF";
         };
         refreshLook();
 
