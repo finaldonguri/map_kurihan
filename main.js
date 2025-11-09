@@ -3,25 +3,34 @@ Cesium.Ion.defaultAccessToken =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyOGRiZmY3Yy0wNzRjLTQ2MjktOGQ0Ni0xYmI5MzFmNDUxZDAiLCJpZCI6MzU0MDY0LCJpYXQiOjE3NjE0NTQ3MDh9.p9q4yTuNNbVz7U09nx04n-LQG0sxXh8TDw22H3FSIV0";
 
 (async function () {
-    // ===== 画面に応じたUI倍率 =====
+    // === 追加: モバイルでも読みやすい最小スケール ===
     function computeUiScale() {
         const small = window.matchMedia("(max-width: 600px)").matches;
         const tiny = window.matchMedia("(max-width: 380px)").matches;
-        // 端末DPRも加味（上げすぎると重くなるので上限2）
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        // ベース倍率
         let base = 1.0;
         if (small) base = 1.25;
         if (tiny) base = 1.4;
-        return base * (dpr >= 1.5 ? 1.0 : 1.0); // DPRで無理に上げない（負荷対策）
+        return base;
     }
     let uiScale = computeUiScale();
-
-    // CSS変数にも反映（ボタンなど）
-    document.documentElement.style.setProperty("--ui-scale", String(uiScale));
-
-    // ユーティリティ
     const px = (n) => `${Math.round(n * uiScale)}px`;
+
+    // ラベル/ポイントに一括適用（存在するプロパティのみ触る）
+    function applyCalloutStyle(entity, textFontPxBase = 18) {
+        if (entity.point) {
+            entity.point.pixelSize = Math.round(8 * uiScale);
+            entity.point.outlineWidth = Math.round(2 * uiScale);
+        }
+        if (entity.label) {
+            entity.label.font = `bold ${px(textFontPxBase)} sans-serif`;
+            entity.label.outlineWidth = Math.max(2, Math.round(3 * uiScale));
+            entity.label.pixelOffset = new Cesium.Cartesian2(0, -Math.round(8 * uiScale));
+            entity.label.scaleByDistance = new Cesium.NearFarScalar(
+                300.0, 1.0 * uiScale,
+                8000.0, 0.7 * uiScale
+            );
+        }
+    }
     // ===== Viewer =====
     const viewer = new Cesium.Viewer("cesiumContainer", {
         baseLayerPicker: false,
@@ -396,7 +405,7 @@ Cesium.Ion.defaultAccessToken =
                 // 生成ボタン用（色でON/OFF表現）
                 btn.style.background = visible ? "#2d8cff" : "rgba(255,255,255,.12)";
             }
-            btn.textContent = visible ? "→:ON" : "→:OFF";
+            btn.textContent = visible ? "Summary Route:ON" : "Summary Route:OFF";
         };
         refreshLook();
 
