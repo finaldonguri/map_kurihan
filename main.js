@@ -3,6 +3,34 @@ Cesium.Ion.defaultAccessToken =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyOGRiZmY3Yy0wNzRjLTQ2MjktOGQ0Ni0xYmI5MzFmNDUxZDAiLCJpZCI6MzU0MDY0LCJpYXQiOjE3NjE0NTQ3MDh9.p9q4yTuNNbVz7U09nx04n-LQG0sxXh8TDw22H3FSIV0";
 
 (async function () {
+    // === 追加: モバイルでも読みやすい最小スケール ===
+    function computeUiScale() {
+        const small = window.matchMedia("(max-width: 600px)").matches;
+        const tiny = window.matchMedia("(max-width: 380px)").matches;
+        let base = 1.0;
+        if (small) base = 1.25;
+        if (tiny) base = 1.4;
+        return base;
+    }
+    let uiScale = computeUiScale();
+    const px = (n) => `${Math.round(n * uiScale)}px`;
+
+    // ラベル/ポイントに一括適用（存在するプロパティのみ触る）
+    function applyCalloutStyle(entity, textFontPxBase = 18) {
+        if (entity.point) {
+            entity.point.pixelSize = Math.round(8 * uiScale);
+            entity.point.outlineWidth = Math.round(2 * uiScale);
+        }
+        if (entity.label) {
+            entity.label.font = `bold ${px(textFontPxBase)} sans-serif`;
+            entity.label.outlineWidth = Math.max(2, Math.round(3 * uiScale));
+            entity.label.pixelOffset = new Cesium.Cartesian2(0, -Math.round(8 * uiScale));
+            entity.label.scaleByDistance = new Cesium.NearFarScalar(
+                300.0, 1.0 * uiScale,
+                8000.0, 0.7 * uiScale
+            );
+        }
+    }
     // ===== Viewer =====
     const viewer = new Cesium.Viewer("cesiumContainer", {
         baseLayerPicker: false,
@@ -253,56 +281,73 @@ Cesium.Ion.defaultAccessToken =
             }
         }
 
-        // スタート／ゴール（任意）
-        viewer.entities.add({
-            id: "start",                   // 任意の固定ID（なくてもOK）
-            name: "スタート地点（上古賀集落）",
-            description: `
-    <h3>スタート地点（上古賀集落）</h3>
-    <p>ここから九里半街道の散策ルートが始まります。</p>
-    <ul>
-      <li>標高: 約 134 m</li>
-      <li>座標: 35.36 N, 135.97 E, </li>
-    </ul>
-  `,
-              position: Cesium.Cartesian3.fromDegrees(135.9764736, 35.3648148, 184),
-            point: { pixelSize: 8, color: Cesium.Color.RED, outlineColor: Cesium.Color.WHITE, outlineWidth: 2 },
-            label: {
-                text: "Start",
-                font: "14pt sans-serif",
-                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                fillColor: Cesium.Color.WHITE,
-                outlineColor: Cesium.Color.BLACK,
-                outlineWidth: 3,
-                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                pixelOffset: new Cesium.Cartesian2(0, -9),
-            },
-        });
+        // ===== コールアウト関数 =====
+        async function addCallout(viewer, lon, lat, lift, text) {
+            const carto = Cesium.Cartographic.fromDegrees(lon, lat);
+            const [updated] = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [carto]);
+            const groundH = (updated && updated.height) || 0;
 
-        viewer.entities.add({
-            id: "Finish",                   // 任意の固定ID（なくてもOK）
-            name: "ゴール地点（石田川河口）",
-            description: `
-    <h3>ゴール地点（石田川河口）</h3>
-    <p>かつての九里半街道は、ここから船にて湖上を大津へ向かいました。</p>
-    <ul>
-      <li>標高: 約 86 m</li>
-      <li>座標: 35.40 N, 136.04 E</li>
-    </ul>
-  `,
-            position: Cesium.Cartesian3.fromDegrees(136.045836, 35.408181, 134),
-            point: { pixelSize: 8, color: Cesium.Color.RED, outlineColor: Cesium.Color.WHITE, outlineWidth: 2 },
-            label: {
-                text: "Finish",
-                font: "14pt sans-serif",
-                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                fillColor: Cesium.Color.WHITE,
-                outlineColor: Cesium.Color.BLACK,
-                outlineWidth: 3,
-                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                pixelOffset: new Cesium.Cartesian2(0, -9),
-            },
-        });
+            const groundPos = Cesium.Cartesian3.fromDegrees(lon, lat, groundH);
+            const airPos = Cesium.Cartesian3.fromDegrees(lon, lat, groundH + lift);
+
+            // 引出線
+            viewer.entities.add({
+                polyline: {
+                    positions: [groundPos, airPos],
+                    width: Math.max(2, Math.round(2 * uiScale)),
+                    material: Cesium.Color.BLUE.withAlpha(0.9),
+                    clampToGround: false,
+                },
+            });
+
+            // 地面ポイント
+            const pt = viewer.entities.add({
+                position: groundPos,
+                point: {
+                    pixelSize: Math.round(8 * uiScale),
+                    color: Cesium.Color.RED,
+                    outlineColor: Cesium.Color.WHITE,
+                    outlineWidth: Math.round(2 * uiScale),
+                },
+            });
+
+            // 空中ラベル
+            const lb = viewer.entities.add({
+                position: airPos,
+                label: {
+                    text: text,
+                    font: `bold ${px(18)} sans-serif`,
+                    style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                    fillColor: Cesium.Color.WHITE,
+                    outlineColor: Cesium.Color.BLACK,
+                    outlineWidth: Math.max(2, Math.round(3 * uiScale)),
+                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                    pixelOffset: new Cesium.Cartesian2(0, -Math.round(8 * uiScale)),
+                    disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                    scaleByDistance: new Cesium.NearFarScalar(300.0, 1.0 * uiScale, 8000.0, 0.7 * uiScale),
+                },
+            });
+
+            // 念のためスタイル適用（将来の一括更新にも対応）
+            applyCalloutStyle(pt);
+            applyCalloutStyle(lb);
+        }
+
+        // ===== 11個のポイント =====
+        const calloutPoints = [
+            { lon: 135.979569, lat: 35.363215, lift: 150, text: "上古賀" },
+            { lon: 135.992452, lat: 35.358096, lift: 150, text: "下古賀" },
+            { lon: 135.999059, lat: 35.346819, lift: 150, text: "南古賀" },
+            { lon: 136.036103, lat: 35.401112, lift: 150, text: "今津" },
+            { lon: 136.002362, lat: 35.387109, lift: 150, text: "饗庭野演習場" },
+            { lon: 136.031997, lat: 35.372335, lift: 150, text: "饗庭" },
+            { lon: 136.029968, lat: 35.359905, lift: 150, text: "熊野本" },
+            { lon: 136.013546, lat: 35.358712, lift: 150, text: "大寶寺山" },
+            { lon: 136.021757, lat: 35.346550, lift: 150, text: "安曇川" },
+            { lon: 136.066304, lat: 35.353863, lift: 150, text: "外ヶ濱" },
+            { lon: 136.027090, lat: 35.351784, lift: 150, text: "安井川" }
+        ];
+        for (const p of calloutPoints) await addCallout(viewer, p.lon, p.lat, p.lift, p.text);
 
         viewer.flyTo(ds);
     } catch (e) {
