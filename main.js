@@ -345,7 +345,11 @@ Cesium.Ion.defaultAccessToken =
             { lon: 136.013546, lat: 35.358712, lift: 150, text: "大寶寺山" },
             { lon: 136.021757, lat: 35.346550, lift: 150, text: "安曇川" },
             { lon: 136.066304, lat: 35.353863, lift: 150, text: "外ヶ濱" },
-            { lon: 136.027090, lat: 35.351784, lift: 150, text: "安井川" }
+            { lon: 136.027090, lat: 35.351784, lift: 150, text: "安井川" },
+            { lon: 136.020389, lat: 35.343009, lift: 150, text: "十八川" },
+            { lon: 136.008685, lat: 35.344818, lift: 150, text: "庄堺" },
+            { lon: 136.033106, lat: 35.386475, lift: 150, text: "木津" },
+            { lon: 136.043913, lat: 35.409439, lift: 150, text: "濱分" }
         ];
         for (const p of calloutPoints) await addCallout(viewer, p.lon, p.lat, p.lift, p.text);
 
